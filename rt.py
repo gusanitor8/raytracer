@@ -16,6 +16,8 @@ class RayTracer(object):
         self.rtClearColor(0, 0, 0)
         self.rtClear()
 
+        self.lights = []
+
     def rtViewPort(self, posX, posY, width, height):
         self.vpX = posX
         self.vpY = posY
@@ -53,11 +55,15 @@ class RayTracer(object):
                 self.screen.set_at((x, y), self.currColor)
 
     def rtCastRay(self, orig, dir):
-        for obj in self.scene:
-            if obj.ray_intersect(orig, dir):
-                return True
+        intercept = None
+        hit = None
 
-        return False
+        for obj in self.scene:
+            intercept = obj.ray_intersect(orig, dir)
+            if intercept != None:
+                hit = intercept
+
+        return hit
 
     def rtRender(self):
         for x in range(self.vpX, self.vpX + self.vpWidth + 1):
@@ -75,5 +81,26 @@ class RayTracer(object):
                     direction = (pX, pY, -self.nearPlane)
                     direction = direction / np.linalg.norm(direction)
 
-                    if self.rtCastRay(self.camPosirion, direction):
-                        self.rtPoint(x, y)
+                    intercept = self.rtCastRay(self.camPosirion, direction)
+
+                    if intercept != None:
+                        material = intercept.obj.material
+                        colorP = material.diffuse
+
+                        for light in self.lights:
+                            if light.lightType == "Ambient":
+                                colorP[0] *= light.intensity * light.color[0]
+                                colorP[1] *= light.intensity * light.color[1]
+                                colorP[2] *= light.intensity * light.color[2]
+
+                            elif light.lightType == "Directional":
+                                lightDir = np.array(light.direction) * -1
+                                lightDir = lightDir / np.linalg.norm(lightDir)
+                                intensity = np.dot(lightDir, intercept.normal)
+                                intensity = max(0, min(1, intensity))
+
+                                colorP[0] *= intensity
+                                colorP[1] *= intensity
+                                colorP[2] *= intensity
+
+                        self.rtPoint(x, y, colorP)
