@@ -85,7 +85,7 @@ class RayTracer(object):
 
                     if intercept != None:
                         material = intercept.obj.material
-                        colorP = material.diffuse
+                        colorP = list(material.diffuse)
 
                         for light in self.lights:
                             if light.lightType == "Ambient":

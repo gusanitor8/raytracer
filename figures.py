@@ -30,7 +30,7 @@ class Sphere(Shape):
         d = (lengthL**2 - tca**2)**0.5
 
         if d > self.radius:
-            return False
+            return None
 
         thc = (self.radius**2 - d**2)**0.5
         t0 = tca - thc
