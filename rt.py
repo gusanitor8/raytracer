@@ -84,23 +84,25 @@ class RayTracer(object):
                     intercept = self.rtCastRay(self.camPosirion, direction)
 
                     if intercept != None:
-                        material = intercept.obj.material
-                        colorP = list(material.diffuse)
+                        # phong reflection model
+                        # Light Color = Ambient + Diffuse + LightColor
+                        # FinalColor = SurfaceColor  * LightColor
+
+                        surfaceColor = intercept.obj.material.diffuse
+                        ambientLightColor = [0,0,0]
+                        diffuseLightColor = [0,0,0]
+                        specularLightColor = [0,0,0]
 
                         for light in self.lights:
                             if light.lightType == "Ambient":
-                                colorP[0] *= light.intensity * light.color[0]
-                                colorP[1] *= light.intensity * light.color[1]
-                                colorP[2] *= light.intensity * light.color[2]
+                                ambientLightColor = [ambientLightColor[i] + light.getLightColor()[i] for i in range(3)]
 
-                            elif light.lightType == "Directional":
-                                lightDir = np.array(light.direction) * -1
-                                lightDir = lightDir / np.linalg.norm(lightDir)
-                                intensity = np.dot(lightDir, intercept.normal)
-                                intensity = max(0, min(1, intensity))
+                            else:
+                                diffuseLightColor = [diffuseLightColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
+                                specularLightColor = [(specularLightColor[i] + light.getSpecularColor(intercept, self.camPosirion)[i]) for i in range(3)]
 
-                                colorP[0] *= intensity
-                                colorP[1] *= intensity
-                                colorP[2] *= intensity
 
-                        self.rtPoint(x, y, colorP)
+                        lightColor = [ambientLightColor[i] + diffuseLightColor[i] + specularLightColor[i] for i in range(3)]
+                        finalColor = [min(1, surfaceColor[i] * lightColor[i]) for i in range(3)]
+
+                        self.rtPoint(x, y, finalColor)
