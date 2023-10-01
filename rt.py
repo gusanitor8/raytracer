@@ -54,14 +54,18 @@ class RayTracer(object):
             else:
                 self.screen.set_at((x, y), self.currColor)
 
-    def rtCastRay(self, orig, dir):
+    def rtCastRay(self, orig, dir, sceneObj=None):
+        depth = float('inf')
         intercept = None
         hit = None
 
         for obj in self.scene:
-            intercept = obj.ray_intersect(orig, dir)
-            if intercept != None:
-                hit = intercept
+            if sceneObj != obj:
+                intercept = obj.ray_intersect(orig, dir)
+                if intercept != None:
+                    if intercept.distance < depth:
+                        hit = intercept
+                        depth = intercept.distance
 
         return hit
 
@@ -98,8 +102,14 @@ class RayTracer(object):
                                 ambientLightColor = [ambientLightColor[i] + light.getLightColor()[i] for i in range(3)]
 
                             else:
-                                diffuseLightColor = [diffuseLightColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
-                                specularLightColor = [(specularLightColor[i] + light.getSpecularColor(intercept, self.camPosirion)[i]) for i in range(3)]
+                                shadowIntersect = None
+                                if light.lightType == "Directional":
+                                    lightDir = [(i * -1) for i in light.direction]
+                                    shadowIntersect = self.rtCastRay(intercept.point, lightDir, intercept.obj)
+
+                                if shadowIntersect == None:
+                                    diffuseLightColor = [diffuseLightColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
+                                    specularLightColor = [(specularLightColor[i] + light.getSpecularColor(intercept, self.camPosirion)[i]) for i in range(3)]
 
 
                         lightColor = [ambientLightColor[i] + diffuseLightColor[i] + specularLightColor[i] for i in range(3)]

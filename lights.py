@@ -39,7 +39,7 @@ class DirectionalLight(Light):
 
         intensity = np.dot(intercept.normal, dir) * self.intensity
         intensity = max(0, min(1, intensity))
-
+        intensity *= 1 - intercept.obj.material.ks
         diffuseColor = [(i * intensity) for i in self.color]
 
         return diffuseColor
@@ -51,6 +51,7 @@ class DirectionalLight(Light):
         viewDir = viewDir / np.linalg.norm(viewDir)
 
         specIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.spec
+        specIntensity *= intercept.obj.material.ks
         specIntensity *= self.intensity
 
         specColor = [(i * specIntensity) for i in self.color]
