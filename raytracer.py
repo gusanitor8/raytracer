@@ -28,6 +28,7 @@ raytracer.scene.append(Sphere(position=(0, 0, -7), radius=2, material=brick))
 
 raytracer.lights.append(AmbientLight(intensity=0.1))
 raytracer.lights.append(DirectionalLight(direction=(-1, -1, -1), intensity=0.7))
+raytracer.lights.append(PointLight(point=(5, 0, -5), intensity=0.5, color=(1, 0, 1)))
 
 isRunning = True
 

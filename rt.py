@@ -43,6 +43,8 @@ class RayTracer(object):
         self.currColor = (r*255, g*255, b*255)
 
     def rtPoint(self, x, y, color=None):
+        y = self.width - y
+
         if (0 <= x < self.width and 0 <= y < self.height):
             if color != None:
                 color = (color[0]*255,
@@ -103,9 +105,14 @@ class RayTracer(object):
 
                             else:
                                 shadowIntersect = None
+                                lightDir = None
                                 if light.lightType == "Directional":
                                     lightDir = [(i * -1) for i in light.direction]
-                                    shadowIntersect = self.rtCastRay(intercept.point, lightDir, intercept.obj)
+                                elif light.lightType == "Point":
+                                    lightDir = np.subtract(light.point, intercept.point)
+                                    lightDir = lightDir/ np.linalg.norm(lightDir)
+
+                                shadowIntersect = self.rtCastRay(intercept.point, lightDir, intercept.obj)
 
                                 if shadowIntersect == None:
                                     diffuseLightColor = [diffuseLightColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
