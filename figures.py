@@ -1,11 +1,13 @@
 import numpy as np
+from math import atan2, acos, pi
 
 
 class Intercept(object):
-    def __init__(self, distance, point, normal, obj):
+    def __init__(self, distance, point, normal, texcoords, obj):
         self.distance = distance
         self.point = point
         self.normal = normal
+        self.texcoords = texcoords
         self.obj = obj
 
 
@@ -27,12 +29,12 @@ class Sphere(Shape):
         L = np.subtract(self.position, orig)
         lengthL = np.linalg.norm(L)
         tca = np.dot(L, dir)
-        d = (lengthL**2 - tca**2)**0.5
+        d = (lengthL ** 2 - tca ** 2) ** 0.5
 
         if d > self.radius:
             return None
 
-        thc = (self.radius**2 - d**2)**0.5
+        thc = (self.radius ** 2 - d ** 2) ** 0.5
         t0 = tca - thc
         t1 = tca + thc
 
@@ -43,5 +45,9 @@ class Sphere(Shape):
 
         P = np.add(orig, t0 * np.array(dir))
         normal = np.subtract(P, self.position)  # why?
+        normal = normal / np.linalg.norm(normal)
 
-        return Intercept(distance=t0, point=P, normal=normal, obj=self)
+        u = (atan2(normal[2], normal[0]) / (2 * pi)) + 0.5
+        v = acos(normal[1]) / pi
+
+        return Intercept(distance=t0, point=P, normal=normal, texcoords=(u, v), obj=self)
