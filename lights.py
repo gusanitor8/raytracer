@@ -1,5 +1,5 @@
 import numpy as np
-
+from math import acos, asin
 
 def reflectVector(direction, normal):
     reflect = 2 * np.dot(direction, normal)
@@ -8,6 +8,30 @@ def reflectVector(direction, normal):
     reflect = reflect / np.linalg.norm(reflect)
     return reflect
 
+def totalInternalReflection(incident, normal, n1, n2):
+    if n1 < n2:
+        n1, n2 = n2, n1
+
+    ai = acos(np.dot(incident, normal))
+    ac = asin(n2/n1)
+
+    return ai >= ac
+
+def refractVector(incident, normal, n1, n2):
+    # Snells law
+    refract = np.multiply(np.dot(incident, normal), normal)
+    refract = np.subtract(incident, refract)
+    refract = n1 * refract
+    refract = refract / n2
+
+    refract = refract/np.linalg.norm(refract)
+    return refract
+
+def fresnel(n1,n2):
+    kr = ((n1**0.5 - n2**0.5)**2)/((n1**0.5 + n2**0.5)**2)
+    kt = 1 - kr
+
+    return kr, kt
 
 class Light(object):
     def __init__(self, intensity=1, color=(1, 1, 1), lightType="None"):

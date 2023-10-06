@@ -2,7 +2,7 @@ import random
 from math import tan, atan2, acos, pi
 import numpy as np
 from materials import *
-from lights import reflectVector
+from lights import *
 import random
 import pygame
 
@@ -92,7 +92,7 @@ class RayTracer(object):
                 y = acos(rayDirection[1]) / pi * self.envMap.get_height()
                 envColor = self.envMap.get_at((int(x), int(y)))
 
-                return [i/255 for i in envColor]
+                return [envColor[i]/255 for i in range(3)]
             else:
                 return None
 
@@ -115,6 +115,7 @@ class RayTracer(object):
 
 
         reflectColor = [0,0,0]
+        refractColor = [0,0,0]
         ambientLightColor = [0, 0, 0]
         diffuseLightColor = [0, 0, 0]
         specularLightColor = [0, 0, 0]
@@ -165,8 +166,32 @@ class RayTracer(object):
                         specularLightColor = [
                             (specularLightColor[i] + light.getSpecularColor(intercept, self.camPosirion)[i]) for i in
                             range(3)]
+        elif material.matType == TRANSPARENT:
+            outside = np.dot(rayDirection, intercept.normal) < 0
+            bias = intercept.normal * 0.001
 
-        lightColor = [ambientLightColor[i] + diffuseLightColor[i] + specularLightColor[i] + reflectColor[i] for i in range(3)]
+            reflect = reflectVector(np.array(rayDirection) * -1, intercept.normal)
+            reflectOrig = np.add(intercept.point, bias) if outside else np.subtract(intercept.point, bias)
+            reflectIntercept = self.rtCastRay(reflectOrig, reflect, None, recursion + 1)
+            reflectColor = self.rtRayColor(reflectIntercept, reflect, recursion + 1)
+
+            n1 = 1.0 if outside else material.ior
+            n2 = material.ior if outside else 1.0
+
+            if not totalInternalReflection(rayDirection, intercept.normal, n1, n2):
+                refract = refractVector(rayDirection, intercept.point, n1, n2)
+                refracrOrig = np.subtract(intercept.point, bias) if outside else np.add(intercept.point, bias)
+                refractIntercept = self.rtCastRay(refracrOrig, refract, None, recursion + 1)
+                refractColor = self.rtRayColor(refractIntercept, refract, recursion + 1)
+
+            kr, kt = fresnel(n1,n2)
+
+            reflectColor = np.multiply(reflectColor, kr)
+            refractColor = np.multiply(refractColor, kt)
+
+        lightColor = [
+            ambientLightColor[i] + diffuseLightColor[i] + specularLightColor[i] + reflectColor[i] + refractColor[i] for
+            i in range(3)]
         finalColor = [min(1, (surfaceColor[i] * lightColor[i])) for i in range(3)]
 
         return finalColor
