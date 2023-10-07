@@ -8,27 +8,53 @@ def reflectVector(direction, normal):
     reflect = reflect / np.linalg.norm(reflect)
     return reflect
 
-def totalInternalReflection(incident, normal, n1, n2):
-    if n1 < n2:
+def totalInternalReflection(incident, normal, n1, n2): # cambie el orden de incident y normal y funciono
+    c1 = np.dot(normal, incident)
+
+    if c1 < 0:
+        c1 = -c1
+    else:
+        normal = np.array(normal) * -1
         n1, n2 = n2, n1
 
-    ai = acos(np.dot(incident, normal))
-    ac = asin(n2/n1)
+    if n1 < n2:
+        return  False
 
-    return ai >= ac
+    theta1 = acos(c1)
+    thetaC = asin(n2/n1)
 
-def refractVector(incident, normal, n1, n2):
+    return theta1 >= thetaC
+
+def refractVector(normal, incident, n1, n2):
     # Snells law
-    refract = np.multiply(np.dot(incident, normal), normal)
-    refract = np.subtract(incident, refract)
-    refract = n1 * refract
-    refract = refract / n2
+    c1 = np.dot(normal, incident)
 
-    refract = refract/np.linalg.norm(refract)
-    return refract
+    if c1 < 0:
+        c1 = -c1
+    else:
+        normal = np.array(normal) * -1
+        n1, n2 = n2, n1
 
-def fresnel(n1,n2):
-    kr = ((n1**0.5 - n2**0.5)**2)/((n1**0.5 + n2**0.5)**2)
+    n = n1 / n2
+    T = n * (incident + c1 * normal) - normal * (1 - n ** 2 * (1 - c1 ** 2)) ** 0.5
+    T = T / np.linalg.norm(T)
+    return T
+
+def fresnel(normal, incident, n1, n2):
+    c1 = np.dot(normal, incident)
+
+    if c1 < 0 :
+        c1 = -c1
+    else:
+        n1, n2 = n2, n1
+
+    s2 = (n1 * (1 - c1 ** 2) ** 0.5) / n2
+    c2 = (1 - s2 ** 2) ** 0.5
+
+    F1 = (((n2 * c1) - (n1 * c2)) / ((n2 * c1) + (n1 * c2))) ** 2
+    F2 = (((n1 * c2) - (n2 * c1)) / ((n1 * c2) + (n2 * c1))) ** 2
+
+    kr = (F1 + F2) / 2
     kt = 1 - kr
 
     return kr, kt
