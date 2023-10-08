@@ -1,11 +1,12 @@
 import numpy as np
+import mathlib as ml
 
 
 def reflectVector(direction, normal):
-    reflect = 2 * np.dot(direction, normal)
-    reflect = np.multiply(reflect, normal)
-    reflect = np.subtract(reflect, direction)
-    reflect = reflect / np.linalg.norm(reflect)
+    reflect = 2 * ml.dot(direction, normal)
+    reflect = ml.multiply(reflect, normal)
+    reflect = ml.subtract(reflect, direction)
+    reflect = reflect / ml.norm(reflect)
     return reflect
 
 
@@ -34,13 +35,13 @@ class AmbientLight(Light):
 
 class DirectionalLight(Light):
     def __init__(self, direction=(0, -1, 0), intensity=1, color=(1, 1, 1)):
-        self.direction = direction / np.linalg.norm(direction)
+        self.direction = [i / ml.norm(direction) for i in direction]
         super().__init__(intensity, color, "Directional")
 
     def getDiffuseColor(self, intercept):
         dir = [(i * -1) for i in self.direction]
 
-        intensity = np.dot(intercept.normal, dir) * self.intensity
+        intensity = ml.dot(intercept.normal, dir) * self.intensity
         intensity = max(0, min(1, intensity))
         intensity *= 1 - intercept.obj.material.ks
         diffuseColor = [(i * intensity) for i in self.color]
@@ -50,10 +51,10 @@ class DirectionalLight(Light):
     def getSpecularColor(self, intercept, viewPos):
         dir = [(i * -1) for i in self.direction]
         reflect = reflectVector(dir, intercept.normal)
-        viewDir = np.subtract(viewPos, intercept.point)
-        viewDir = viewDir / np.linalg.norm(viewDir)
+        viewDir = ml.subtract(viewPos, intercept.point)
+        viewDir = viewDir / ml.norm(viewDir)
 
-        specIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.spec
+        specIntensity = max(0, ml.dot(viewDir, reflect)) ** intercept.obj.material.spec
         specIntensity *= intercept.obj.material.ks
         specIntensity *= self.intensity
 
@@ -67,11 +68,11 @@ class PointLight(Light):
         super().__init__(intensity, color, "Point")
 
     def getDiffuseColor(self, intercept):
-        dir = np.subtract(self.point, intercept.point)
-        R = np.linalg.norm(dir)
+        dir = ml.subtract(self.point, intercept.point)
+        R = ml.norm(dir)
         dir = dir / R
 
-        intensity = np.dot(intercept.normal, dir) * self.intensity
+        intensity = ml.dot(intercept.normal, dir) * self.intensity
         intensity *= 1 - intercept.obj.material.ks
 
         # ley de cuadrados inversos
@@ -85,16 +86,16 @@ class PointLight(Light):
         return [(i * intensity) for i in self.color]
 
     def getSpecularColor(self, intercept, viewPos):
-        dir = np.subtract(self.point, intercept.point)
-        R = np.linalg.norm(dir)
+        dir = ml.subtract(self.point, intercept.point)
+        R = ml.linalg.norm(dir)
         dir = dir / R
 
         reflect = reflectVector(dir, intercept.normal)
 
-        viewDir = np.subtract(viewPos, intercept.point)
-        viewDir = viewDir / np.linalg.norm(viewDir)
+        viewDir = ml.subtract(viewPos, intercept.point)
+        viewDir = viewDir / ml.linalg.norm(viewDir)
 
-        specIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.spec
+        specIntensity = max(0, ml.dot(viewDir, reflect)) ** intercept.obj.material.spec
         specIntensity *= intercept.obj.material.ks
         specIntensity *= self.intensity
 

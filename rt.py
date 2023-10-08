@@ -1,4 +1,5 @@
 from math import tan, pi
+import mathlib as ml
 import numpy as np
 
 
@@ -85,7 +86,7 @@ class RayTracer(object):
 
                     # crear un rayo
                     direction = (pX, pY, -self.nearPlane)
-                    direction = direction / np.linalg.norm(direction)
+                    direction = [i / ml.norm(direction) for i in direction]
 
                     intercept = self.rtCastRay(self.camPosirion, direction)
 
@@ -109,8 +110,9 @@ class RayTracer(object):
                                 if light.lightType == "Directional":
                                     lightDir = [(i * -1) for i in light.direction]
                                 elif light.lightType == "Point":
-                                    lightDir = np.subtract(light.point, intercept.point)
-                                    lightDir = lightDir/ np.linalg.norm(lightDir)
+                                    lightDir = ml.subtract(light.point, intercept.point)
+                                    # lightDir = lightDir/ np.linalg.norm(lightDir)
+                                    lightDir = [i / ml.norm(lightDir) for i in lightDir]
 
                                 shadowIntersect = self.rtCastRay(intercept.point, lightDir, intercept.obj)
 
