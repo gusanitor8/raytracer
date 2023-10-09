@@ -31,13 +31,13 @@ glass = Material(diffuse=(0.9, 0.9, 0.9), spec=64, ks=0.2, ior=1.5, matType=TRAN
 cloredGlass = Material(diffuse=(0.9, 0.3, 0.9), spec=64, ks=0.2, ior=1.5, matType=TRANSPARENT)
 
 # Objects
-# raytracer.scene.append(Sphere(position=(-2, 1, -5), radius=1, material=brick))
-# raytracer.scene.append(Sphere(position=(0, 1, -5), radius=1, material=earth))
+raytracer.scene.append(Sphere(position=(-2, 1, -5), radius=1, material=brick))
+raytracer.scene.append(Sphere(position=(0, 1, -5), radius=1, material=earth))
 raytracer.scene.append(Sphere(position=(2, 1, -5), radius=1, material=mirror))
 
-# raytracer.scene.append(Sphere(position=(-2, -1, -5), radius=1, material=marble))
-# raytracer.scene.append(Sphere(position=(0, -1, -5), radius=1, material=glass))
-# raytracer.scene.append(Sphere(position=(2, -1, -5), radius=1, material=cloredGlass))
+raytracer.scene.append(Sphere(position=(-2, -1, -5), radius=1, material=marble))
+raytracer.scene.append(Sphere(position=(0, -1, -5), radius=1, material=glass))
+raytracer.scene.append(Sphere(position=(2, -1, -5), radius=1, material=cloredGlass))
 
 # Lights
 raytracer.lights.append(AmbientLight(intensity=0.1))
