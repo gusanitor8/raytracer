@@ -28,7 +28,7 @@ class Sphere(Shape):
 
     def ray_intersect(self, orig, dir):
         L = ml.subtract(self.position, orig)
-        lengthL = ml.linalg.norm(L)
+        lengthL = ml.norm(L)
         tca = ml.dot(L, dir)
         d = (lengthL ** 2 - tca ** 2) ** 0.5
 
@@ -93,7 +93,7 @@ class Disk(Plane):
             return None
 
         contactDistance = ml.subtract(planeIntersect.point, self.position)
-        contactDistance = ml.linalg.norm(contactDistance)
+        contactDistance = ml.norm(contactDistance)
 
         if contactDistance > self.radius:
             return None
