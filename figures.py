@@ -105,6 +105,41 @@ class Disk(Plane):
                          obj=self)
 
 
+class Triangle(Plane):
+    def __init__(self, material, v0, v1, v2):
+        self.v0 = v0
+        self.v1 = v1
+        self.v2 = v2
+        super().__init__(v0, self.calculate_normal(), material)
+
+    def ray_intersect(self, orig, dir):
+        planeIntersect = super().ray_intersect(orig, dir)
+
+        if planeIntersect is None:
+            return None
+
+        # Check if the intersection point is inside the triangle
+        u, v, w = ml.barycentric_coords(self.v0, self.v1, self.v2, planeIntersect.point)
+
+        if 0 <= u <= 1 and 0 <= v <= 1 and 0 <= w <= 1:
+            return Intercept(
+                distance=planeIntersect.distance,
+                point=planeIntersect.point,
+                normal=self.normal,
+                texcoords=None,
+                obj=self,
+            )
+
+        return None
+
+    def calculate_normal(self):
+        # Calculate the normal vector of the triangle from its vertices
+        edge1 = ml.subtract(self.v1, self.v0)
+        edge2 = ml.subtract(self.v2, self.v0)
+        normal = ml.cross_product(edge1, edge2)
+        return normal / ml.norm(normal)
+
+
 class AABB(Shape):
     def __init__(self, position, size, material):
         super().__init__(position, material)

@@ -35,18 +35,7 @@ earth = Material(texture=earthTex)
 marble = Material(diffuse=(0.4, 0.4, 0.4), spec=64, ks=0.2, matType=REFLECTIVE, texture=marbleTex)
 glass = Material(diffuse=(0.7, 0.8, 0.9), spec=64, ks=0.2, ior=1.5, matType=TRANSPARENT)
 
-raytracer.scene.append(Plane(position=(4, 0, -5), normal=(-1, 0, 0), material=color))
-raytracer.scene.append(Plane(position=(-4, 0, -5), normal=(1, 0, 0), material=color2))
-
-raytracer.scene.append(Plane(position=(0, 4, -5), normal=(0, -1, 0), material=color3))
-raytracer.scene.append(Plane(position=(0, -4, -5), normal=(0, 1, 0), material=color4))
-
-raytracer.scene.append(Plane(position=(0, 0, -15), normal=(0, 0, -1), material=color5))
-
-raytracer.scene.append(AABB(position=(-1, 0, -5), size=(1.5, 1.5, 1.5), material=glass))
-raytracer.scene.append(AABB(position=(1, 0, -5), size=(1.5, 1.5, 1.5), material=marble))
-
-raytracer.scene.append(Disk(position=(0, -1, -5), normal=(0, 1, 0), radius=1, material=brick))
+raytracer.scene.append(Triangle(v0=(2, -1, -10), v1=(0, 2, -10), v2=(-2, -1, -10), material=brick))
 
 
 raytracer.lights.append(AmbientLight(intensity=0.4))
@@ -68,6 +57,6 @@ while isRunning:
             if event.key == pygame.K_ESCAPE:
                 isRunning = False
             if event.key == pygame.K_s:
-                pygame.image.save(screen, "screenshot.bmp")
+                pygame.image.save(screen, "screenshot1.bmp")
 
 pygame.quit()

@@ -1,6 +1,40 @@
 import math
 
 
+def barycentric_coords(A, B, C, P):
+    """
+    :param A: Vertice A
+    :param B: Vertice B
+    :param C: Vertice B
+    :param P: Vertice B
+    :return:
+    """
+    areaPBC = (B[1] - C[1]) * (P[0] - C[0]) + (C[0] - B[0]) * (P[1] - C[1])
+    areaACP = (C[1] - A[1]) * (P[0] - C[0]) + (A[0] - C[0]) * (P[1] - C[1])
+    areaABC = (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1])
+
+    try:
+        u = areaPBC / areaABC
+        v = areaACP / areaABC
+        w = 1 - u - v
+    except Exception:
+        u = 0
+        v = 0
+        w = 1
+
+    return v, u, w
+
+def cross_product(vector1, vector2):
+    if len(vector1) != 3 or len(vector2) != 3:
+        raise ValueError("Both input vectors must be 3-dimensional.")
+
+    result = [0, 0, 0]
+    result[0] = vector1[1] * vector2[2] - vector1[2] * vector2[1]
+    result[1] = vector1[2] * vector2[0] - vector1[0] * vector2[2]
+    result[2] = vector1[0] * vector2[1] - vector1[1] * vector2[0]
+
+    return array(result)
+
 def array(arr):
     """
     Esta funcion devuelve un objeto de tipo MyArray
