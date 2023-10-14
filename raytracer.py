@@ -5,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 256
-height = 256
+width = 300
+height = 300
 
 pygame.init()
 
@@ -35,7 +35,9 @@ earth = Material(texture=earthTex)
 marble = Material(diffuse=(0.4, 0.4, 0.4), spec=64, ks=0.2, matType=REFLECTIVE, texture=marbleTex)
 glass = Material(diffuse=(0.7, 0.8, 0.9), spec=64, ks=0.2, ior=1.5, matType=TRANSPARENT)
 
-raytracer.scene.append(Triangle(v0=(2, -1, -10), v1=(0, 2, -10), v2=(-2, -1, -10), material=brick))
+raytracer.scene.append(Triangle(v0=(2, 1, -10), v1=(0, 4, -10), v2=(-2, 1, -10), material=mirror))
+raytracer.scene.append(Triangle(v0=(4, -1, -8), v1=(2, 2, -8), v2=(0, -1, -8), material=glass))
+raytracer.scene.append(Triangle(v0=(0, -1, -8), v1=(-2, 2, -8), v2=(-4, -1, -8), material=marble))
 
 
 raytracer.lights.append(AmbientLight(intensity=0.4))
@@ -57,6 +59,6 @@ while isRunning:
             if event.key == pygame.K_ESCAPE:
                 isRunning = False
             if event.key == pygame.K_s:
-                pygame.image.save(screen, "screenshot1.bmp")
+                pygame.image.save(screen, "screenshot3.bmp")
 
 pygame.quit()
