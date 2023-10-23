@@ -83,18 +83,23 @@ def dot(vector1, vector2):
     return result
 
 
-def add(vector1, vector2):
+def add(*vectors):
     """
-    Esta funcion devuelve la suma de dos vectores de n dimensiones
-    :param vector1: (lista o tupla) Este parametro es un vector de n dimensiones
-    :param vector2: (lista o tupla) Este parametro es un vector de n dimensiones
+    Esta funcion devuelve la suma de n vectores de n dimensiones
+    :param vectors: (tuplas) Estos parametros son n vectores de n dimensiones
     :return: list: el resultado de la suma de los vectores
     """
 
-    if len(vector1) != len(vector2):
-        raise ValueError("Input vectors must have the same dimension.")
+    if not vectors:
+        raise ValueError("At least one vector must be provided.")
 
-    result = [x + y for x, y in zip(vector1, vector2)]
+    dimension = len(vectors[0])
+
+    for vector in vectors:
+        if len(vector) != dimension:
+            raise ValueError("All input vectors must have the same dimension.")
+
+    result = [sum(values) for values in zip(*vectors)]
     return array(result)
 
 
@@ -220,3 +225,10 @@ class MyArray:
 
 
 
+# class MyMatrix(MyArray):
+#     def __init__(self, matrix):
+#         """
+#         Constructor for MyMatrix class. This class represents a matrix of n dimensions.
+#         :param matrix: (list) This parameter is a matrix of n dimensions
+#         """
+#         pass

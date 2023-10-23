@@ -136,7 +136,7 @@ class Triangle(Plane):
         # Calculate the normal vector of the triangle from its vertices
         edge1 = ml.subtract(self.v1, self.v0)
         edge2 = ml.subtract(self.v2, self.v0)
-        normal = ml.cross_product(edge1, edge2)
+        normal = ml.cross_product(edge2, edge1)
         return normal / ml.norm(normal)
 
 
@@ -205,13 +205,13 @@ class AABB(Shape):
 
                                 elif abs(plane.normal[1]) > 0:
                                     # esyoy en Y, usamos X y Z para generar las uvs
-                                    u = (planePoint[0] - self.boundsMin[0]) / (self.size[0]+ bias * 2)
-                                    v = (planePoint[2] - self.boundsMin[2]) / (self.size[2]+ bias * 2)
+                                    u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + bias * 2)
+                                    v = (planePoint[2] - self.boundsMin[2]) / (self.size[2] + bias * 2)
 
                                 elif abs(plane.normal[2]) > 0:
                                     # estoy en Z, usamos X y Y para generar las uvs
-                                    u = (planePoint[0] - self.boundsMin[0]) / (self.size[0]+ bias * 2)
-                                    v = (planePoint[1] - self.boundsMin[1]) / (self.size[1]+ bias * 2)
+                                    u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + bias * 2)
+                                    v = (planePoint[1] - self.boundsMin[1]) / (self.size[1] + bias * 2)
 
         if intersect is None:
             return None
@@ -221,3 +221,37 @@ class AABB(Shape):
                          normal=ml.array(intersect.normal),
                          texcoords=(u, v),
                          obj=self)
+
+
+class TriangularPyramid:
+    def __init__(self, material, base_triangle, apex):
+        self.base_triangle = base_triangle
+        self.apex = apex
+        self.material = material
+
+    def ray_intersect(self, orig, dir):
+        # Check for intersection with each of the four triangular faces
+        intersections = []
+
+        for triangle in [self.base_triangle] + self.get_side_triangles():
+            intersection = triangle.ray_intersect(orig, dir)
+            if intersection:
+                intersections.append(intersection)
+
+
+        if intersections:
+            # Find the closest intersection point
+            closest_intersection = min(intersections, key=lambda i: i.distance)
+            return closest_intersection
+
+        return None
+
+    def get_side_triangles(self):
+        # Define the three side triangles based on the apex and edges of the base triangle
+        v0, v1, v2 = self.base_triangle.v0, self.base_triangle.v1, self.base_triangle.v2
+        side_triangles = [
+            Triangle(self.material, self.apex, v0, v1),
+            Triangle(self.material, self.apex, v1, v2),
+            Triangle(self.material, self.apex, v2, v0),
+        ]
+        return side_triangles
