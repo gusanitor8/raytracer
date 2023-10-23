@@ -2,6 +2,6 @@
 
 
 ### Triangulo Render
-![Triangulo Reflectivo](screenshot3.png)
+![Triangulo Reflectivo](screenshot2.png)
 
 
