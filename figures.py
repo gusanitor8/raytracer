@@ -223,35 +223,81 @@ class AABB(Shape):
                          obj=self)
 
 
-class TriangularPyramid:
-    def __init__(self, material, base_triangle, apex):
-        self.base_triangle = base_triangle
-        self.apex = apex
-        self.material = material
+class Cylinder(Shape):
+    def __init__(self, position, radius, height, material):
+        self.radius = radius
+        self.height = height
+        super().__init__(position, material)
 
     def ray_intersect(self, orig, dir):
-        # Check for intersection with each of the four triangular faces
-        intersections = []
+        # Calculate the top and bottom centers
+        top_center = ml.add(self.position, (0, self.height / 2, 0))
+        bottom_center = ml.add(self.position, (0, -self.height / 2, 0))
 
-        for triangle in [self.base_triangle] + self.get_side_triangles():
-            intersection = triangle.ray_intersect(orig, dir)
-            if intersection:
-                intersections.append(intersection)
+        # Create the top and bottom disks with correct centers
+        top_disk = Disk(top_center, (0, 1, 0), self.radius, self.material)
+        bottom_disk = Disk(bottom_center, (0, -1, 0), self.radius, self.material)
 
+        # Calculate intersections with the top and bottom disks
+        top_intersection = top_disk.ray_intersect(orig, dir)
+        bottom_intersection = bottom_disk.ray_intersect(orig, dir)
+
+        # Now, let's calculate the intersection with the side of the cylinder.
+        # We can think of the side as an infinite tube, and we check if the ray intersects the infinite cylinder.
+        # We'll use the quadratic formula to find the intersections with the side.
+
+        # Define the quadratic equation coefficients
+        a = dir[0] * dir[0] + dir[2] * dir[2]
+        b = 2 * (dir[0] * (orig[0] - self.position[0]) + dir[2] * (orig[2] - self.position[2]))
+        c = (orig[0] - self.position[0]) ** 2 + (orig[2] - self.position[2]) ** 2 - self.radius ** 2
+
+        intersection1 = None
+        intersection2 = None
+
+        discriminant = b ** 2 - 4 * a * c
+
+        if discriminant > 0:
+            # Two intersections with the infinite cylinder
+            t1 = (-b - discriminant ** 0.5) / (2 * a)
+            t2 = (-b + discriminant ** 0.5) / (2 * a)
+
+            # Calculate the y-coordinate of the intersection points along the ray
+            y1 = orig[1] + t1 * dir[1]
+            y2 = orig[1] + t2 * dir[1]
+
+            # Check if the intersection points are within the height of the cylinder
+            if -self.height / 2 <= y1 <= self.height / 2:
+                point1 = ml.add(orig, t1 * ml.array(dir))
+                normal1 = ml.subtract(point1, self.position)
+                normal1 = normal1/ ml.norm(normal1)
+                texcoords1 = self.calculate_cylinder_texcoords(point1)
+
+                intersection1 = Intercept(distance=t1, point=point1, normal=normal1, texcoords=texcoords1, obj=self)
+
+            if -self.height / 2 <= y2 <= self.height / 2:
+                point2 = ml.add(orig, t2 * ml.array(dir))
+                normal2 = ml.subtract(point2, self.position)
+                normal2 = normal2 / ml.norm(normal2)
+                texcoords2 = self.calculate_cylinder_texcoords(point2)
+
+                intersection2 = Intercept(distance=t2, point=point2, normal=normal2, texcoords=texcoords2, obj=self)
+
+        else:
+            # No intersection with the infinite cylinder
+            intersection1 = intersection2 = None
+
+        # Find the closest intersection among all possibilities
+        intersections = [top_intersection, bottom_intersection, intersection1, intersection2]
+        intersections = [i for i in intersections if i is not None]
 
         if intersections:
-            # Find the closest intersection point
             closest_intersection = min(intersections, key=lambda i: i.distance)
             return closest_intersection
 
         return None
 
-    def get_side_triangles(self):
-        # Define the three side triangles based on the apex and edges of the base triangle
-        v0, v1, v2 = self.base_triangle.v0, self.base_triangle.v1, self.base_triangle.v2
-        side_triangles = [
-            Triangle(self.material, self.apex, v0, v1),
-            Triangle(self.material, self.apex, v1, v2),
-            Triangle(self.material, self.apex, v2, v0),
-        ]
-        return side_triangles
+    def calculate_cylinder_texcoords(self, point):
+        # Calculate the texture coordinates for a point on the side of the cylinder
+        u = (atan2(point[2] - self.position[2], point[0] - self.position[0]) + pi) / (2 * pi)
+        v = (point[1] - self.position[1] + self.height / 2) / self.height
+        return (u, v)

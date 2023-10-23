@@ -1,5 +1,7 @@
 import math
 
+PI = 3.141592653589
+
 
 def barycentric_coords(A, B, C, P):
     """
